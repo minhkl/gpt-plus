@@ -53,7 +53,7 @@ export default function PromptForm({ className, initialMessages = [] }: ICompone
 
   return (
     <div className={cx(className, "flex flex-col h-full")}>
-      <Scrollbars className="flex-grow">
+      <Scrollbars className="flex-grow" universal>
         <div className="flex flex-col-reverse gap-2 p-4 min-h-full">
           {isRequesting && <PendingMessage />}
           {[...initialMessages, ...messages].map((message) => (
