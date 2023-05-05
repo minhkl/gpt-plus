@@ -7,6 +7,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import useLocalStorage from "@/utils/useLocalStorage";
 
 type ISettings = {
   model: string;
@@ -30,7 +31,7 @@ const Context = createContext<IContextValues>({
 });
 
 export const OpenAISettingsProvider = ({ children }: PropsWithChildren) => {
-  const [settings, setSettings] = useState<ISettings>(defaultSettings);
+  const [settings, setSettings] = useLocalStorage<ISettings>("openai-settings", defaultSettings);
 
   const setModel = useCallback(
     (newModel: string) =>
@@ -38,15 +39,18 @@ export const OpenAISettingsProvider = ({ children }: PropsWithChildren) => {
         ...prevState,
         model: newModel,
       })),
-    []
+    [setSettings]
   );
 
-  const setTemperature = useCallback((newTemperature: number) => {
-    setSettings((prevState) => ({
-      ...prevState,
-      temperature: newTemperature,
-    }));
-  }, []);
+  const setTemperature = useCallback(
+    (newTemperature: number) => {
+      setSettings((prevState) => ({
+        ...prevState,
+        temperature: newTemperature,
+      }));
+    },
+    [setSettings]
+  );
 
   const values = useMemo(
     () => ({
