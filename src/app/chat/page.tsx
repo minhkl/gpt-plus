@@ -1,5 +1,5 @@
-import PromptForm from "./PromptForm";
-import SideBar from "./SideBar";
+import PromptForm from "./components/PromptForm";
+import SideBar from "./components/SideBar";
 import { OpenAISettingsProvider } from "@/contexts/openAISettingsContext";
 import { listModels } from "@/utils/openai";
 
