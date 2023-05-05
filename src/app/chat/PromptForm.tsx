@@ -1,12 +1,12 @@
 "use client";
-import { KeyboardEvent, useEffect, useState } from "react";
+import { KeyboardEvent, useState } from "react";
 import cx from "clsx";
 import { useForm } from "react-hook-form";
-import customAxios from "@/utils/customAxios";
 import { apiChatCompletionsPost } from "@/apis/chats";
 import { IMessage } from "./interface";
 import { useOpenAISettingsContext } from "@/contexts/openAISettingsContext";
 import { Scrollbars } from "react-custom-scrollbars-2";
+import BotMessagge, { LoadingMessage } from "./BotMessage";
 
 type IFormValues = {
   prompt: string;
@@ -55,18 +55,16 @@ export default function PromptForm({ className, initialMessages = [] }: ICompone
     <div className={cx(className, "flex flex-col h-full")}>
       <Scrollbars className="flex-grow" universal>
         <div className="flex flex-col-reverse gap-2 p-4 min-h-full">
-          {isRequesting && <PendingMessage />}
-          {[...initialMessages, ...messages].map((message) => (
-            <div
-              key={message.timestamp}
-              className={cx("chat", {
-                "chat-start": message.author === "user",
-                "chat-end": message.author !== "user",
-              })}
-            >
-              <div className="chat-bubble">{message.content}</div>
-            </div>
-          ))}
+          {isRequesting && <LoadingMessage />}
+          {[...initialMessages, ...messages].map((message) =>
+            message.author === "user" ? (
+              <div key={message.timestamp} className="chat chat-end">
+                <div className="chat-bubble chat-bubble-secondary">{message.content}</div>
+              </div>
+            ) : (
+              <BotMessagge message={message.content} key={message.timestamp} animate />
+            )
+          )}
         </div>
       </Scrollbars>
       <div className="divider mt-0"></div>
@@ -79,23 +77,6 @@ export default function PromptForm({ className, initialMessages = [] }: ICompone
           onKeyDown={handleKeyPress}
         />
       </form>
-    </div>
-  );
-}
-
-function PendingMessage() {
-  const [dotCount, setDotCount] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setDotCount((prevValue) => (prevValue + 1) % 3);
-    }, 300);
-    return () => clearInterval(timer);
-  }, []);
-
-  return (
-    <div className="chat chat-end">
-      <div className="chat-bubble">{"".padStart(dotCount + 1, ".")}</div>
     </div>
   );
 }
