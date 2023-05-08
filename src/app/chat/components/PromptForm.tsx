@@ -59,10 +59,12 @@ export default function PromptForm({ className, initialMessages = [] }: ICompone
           {[...initialMessages, ...messages].map((message) =>
             message.author === "user" ? (
               <div key={message.timestamp} className="chat chat-end">
-                <div className="chat-bubble chat-bubble-secondary">{message.content}</div>
+                <div className="chat-bubble chat-bubble-secondary whitespace-pre-wrap">
+                  {message.content}
+                </div>
               </div>
             ) : (
-              <BotMessagge message={message.content} key={message.timestamp} animate />
+              <BotMessagge message={message.content} key={message.timestamp} />
             )
           )}
         </div>
