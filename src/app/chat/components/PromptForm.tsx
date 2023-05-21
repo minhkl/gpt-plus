@@ -3,10 +3,10 @@ import { KeyboardEvent, useState } from "react";
 import cx from "clsx";
 import { useForm } from "react-hook-form";
 import { apiChatCompletionsPost } from "@/apis/chats";
-import { IMessage } from "./interface";
+import { IMessage } from "@/types";
 import { useOpenAISettingsContext } from "@/contexts/openAISettingsContext";
 import { Scrollbars } from "react-custom-scrollbars-2";
-import BotMessagge, { LoadingMessage } from "./BotMessage";
+import BotMessagge, { LoadingMessage, UserMessage } from "./BotMessage";
 
 type IFormValues = {
   prompt: string;
@@ -17,9 +17,13 @@ type IComponent = {
   initialMessages: Array<IMessage>;
 };
 
+type ILocalMessage = IMessage & {
+  isNew?: boolean;
+};
+
 export default function PromptForm({ className, initialMessages = [] }: IComponent) {
   const [isRequesting, setIsRequesting] = useState(false);
-  const [messages, setMessages] = useState<Array<IMessage>>([]);
+  const [messages, setMessages] = useState<Array<ILocalMessage>>([]);
 
   const { register, handleSubmit, reset } = useForm<IFormValues>();
 
@@ -34,7 +38,7 @@ export default function PromptForm({ className, initialMessages = [] }: ICompone
     setIsRequesting(true);
     apiChatCompletionsPost({ prompt, temperature: settings.temperature, model: settings.model })
       .then((res) => {
-        setMessages((prevState) => [createBotMessage(res.data.message), ...prevState]);
+        setMessages((prevState) => [createBotMessage(res.data.content), ...prevState]);
       })
       .finally(() => {
         setIsRequesting(false);
@@ -56,15 +60,15 @@ export default function PromptForm({ className, initialMessages = [] }: ICompone
       <Scrollbars className="flex-grow" universal>
         <div className="flex flex-col-reverse gap-2 p-4 min-h-full">
           {isRequesting && <LoadingMessage />}
-          {[...initialMessages, ...messages].map((message) =>
-            message.author === "user" ? (
-              <div key={message.timestamp} className="chat chat-end">
-                <div className="chat-bubble chat-bubble-secondary whitespace-pre-wrap">
-                  {message.content}
-                </div>
-              </div>
+          {[...messages, ...initialMessages].map((message) =>
+            message.type === "user" ? (
+              <UserMessage message={message.content} key={message.id} />
             ) : (
-              <BotMessagge message={message.content} key={message.timestamp} />
+              <BotMessagge
+                message={message.content}
+                key={message.id}
+                animate={(message as ILocalMessage).isNew}
+              />
             )
           )}
         </div>
@@ -83,14 +87,16 @@ export default function PromptForm({ className, initialMessages = [] }: ICompone
   );
 }
 
-const createBotMessage = (content: string): IMessage => ({
-  timestamp: Date.now(),
+const createBotMessage = (content: string): ILocalMessage => ({
+  id: `${Date.now()}`,
   content,
-  author: "bot",
+  type: "bot",
+  isNew: true,
 });
 
-const createUserMessage = (content: string): IMessage => ({
-  timestamp: Date.now(),
+const createUserMessage = (content: string): ILocalMessage => ({
+  id: `${Date.now()}`,
   content,
-  author: "user",
+  type: "user",
+  isNew: true,
 });

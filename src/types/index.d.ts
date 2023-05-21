@@ -1,5 +1,5 @@
 export type IMessage = {
-  timestamp: number;
+  id: string;
   content: string;
-  author: "bot" | "user";
+  type: "bot" | "user";
 };
