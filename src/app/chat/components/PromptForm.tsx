@@ -1,5 +1,5 @@
 "use client";
-import { KeyboardEvent, useState } from "react";
+import { KeyboardEvent, useState, useRef, useEffect, LegacyRef } from "react";
 import cx from "clsx";
 import { useForm } from "react-hook-form";
 import { apiChatCompletionsPost } from "@/apis/chats";
@@ -7,6 +7,7 @@ import { IMessage } from "@/types";
 import { useOpenAISettingsContext } from "@/contexts/openAISettingsContext";
 import { Scrollbars } from "react-custom-scrollbars-2";
 import BotMessagge, { LoadingMessage, UserMessage } from "./BotMessage";
+import useResizeObserver from "@react-hook/resize-observer";
 
 type IFormValues = {
   prompt: string;
@@ -22,12 +23,20 @@ type ILocalMessage = IMessage & {
 };
 
 export default function PromptForm({ className, initialMessages = [] }: IComponent) {
+  const messageBoxRef = useRef<HTMLDivElement | null>(null);
+  const scrollbarRef = useRef<Scrollbars | null>(null);
   const [isRequesting, setIsRequesting] = useState(false);
   const [messages, setMessages] = useState<Array<ILocalMessage>>([]);
 
   const { register, handleSubmit, reset } = useForm<IFormValues>();
 
   const { settings } = useOpenAISettingsContext();
+
+  useResizeObserver(messageBoxRef, () => {
+    if (scrollbarRef.current) {
+      scrollbarRef.current.scrollToBottom();
+    }
+  });
 
   const onSubmit = (values: IFormValues) => {
     if (isRequesting) {
@@ -57,8 +66,8 @@ export default function PromptForm({ className, initialMessages = [] }: ICompone
 
   return (
     <div className={cx(className, "flex flex-col h-full")}>
-      <Scrollbars className="flex-grow" universal>
-        <div className="flex flex-col-reverse gap-2 p-4 min-h-full">
+      <Scrollbars className="flex-grow" universal ref={scrollbarRef}>
+        <div className="flex flex-col-reverse gap-2 p-4 min-h-full" ref={messageBoxRef}>
           {isRequesting && <LoadingMessage />}
           {[...messages, ...initialMessages].map((message) =>
             message.type === "user" ? (
