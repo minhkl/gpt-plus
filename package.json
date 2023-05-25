@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "analyze": "ANALYZE=true next build",
     "test:watch": "jest --watch",
     "lint": "next lint"
   },
@@ -34,5 +35,7 @@
     "tailwindcss": "3.3.2",
     "typescript": "5.0.4"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@next/bundle-analyzer": "^13.4.3"
+  }
 }
