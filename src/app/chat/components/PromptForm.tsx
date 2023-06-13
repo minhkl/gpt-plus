@@ -8,6 +8,7 @@ import { useOpenAISettingsContext } from "@/contexts/openAISettingsContext";
 import { Scrollbars } from "react-custom-scrollbars-2";
 import BotMessagge, { LoadingMessage, UserMessage } from "./BotMessage";
 import useResizeObserver from "@react-hook/resize-observer";
+import ClearMessagesButton from "./ClearMessagesButton";
 
 type IFormValues = {
   prompt: string;
@@ -65,7 +66,14 @@ export default function PromptForm({ className, initialMessages = [] }: ICompone
   };
 
   return (
-    <div className={cx(className, "flex flex-col h-full")}>
+    <div className={cx(className, "relative flex flex-col h-full")}>
+      {[...messages, ...initialMessages].length > 0 && (
+        <ClearMessagesButton
+          onClearSuccess={() => setMessages([])}
+          className="absolute top-5 left-1/2 transform -translate-x-1/2 z-10"
+        />
+      )}
+
       <Scrollbars className="flex-grow" universal ref={scrollbarRef}>
         <div className="flex flex-col-reverse gap-2 p-4 min-h-full" ref={messageBoxRef}>
           {isRequesting && <LoadingMessage />}

@@ -14,3 +14,10 @@ export function apiChatCompletionsPost(params: IChatCompletionsPostParams) {
 export function apiChatComletionsGet() {
   return customAxios.get<IMessage[]>("/messages");
 }
+
+export function apiChatCompletionsClearBulk() {
+  return customAxios({
+    url: "/messages/clear",
+    method: "DELETE",
+  });
+}
